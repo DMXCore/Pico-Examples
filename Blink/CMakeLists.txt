@@ -38,7 +38,7 @@ target_sources(Blink PUBLIC
 target_link_libraries(Blink pico_stdlib picodmx hardware_dma hardware_pio)
 
 # Enable the shell over UART (which is the picoprobe!)
-pico_enable_stdio_usb(Blink 1)
+pico_enable_stdio_usb(Blink 0)
 pico_enable_stdio_uart(Blink 0)
 
 # create map/bin/hex file etc.

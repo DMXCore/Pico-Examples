@@ -38,7 +38,7 @@ int led_mod_value;
 bool repeating_timer_callback(struct repeating_timer *t)
 {
     timer_counter++;
-    led_mod_value = 40;
+    led_mod_value = 10;
 
     if (timer_counter % (led_mod_value - 1) == 0)
     {
@@ -46,6 +46,11 @@ bool repeating_timer_callback(struct repeating_timer *t)
         gpio_put(LED_PIN_INDICATOR, ledValue);
         gpio_put(LED_PIN_DMXPORTA, ledValue);
         gpio_put(LED_PIN_DMXPORTB, ledValue);
+
+        gpio_put(OUTPUT_PIN1, !ledValue);
+        gpio_put(OUTPUT_PIN2, !ledValue);
+        gpio_put(OUTPUT_PIN3, !ledValue);
+        gpio_put(OUTPUT_PIN4, !ledValue);
     }
 
     return true;
@@ -53,16 +58,6 @@ bool repeating_timer_callback(struct repeating_timer *t)
 
 int main()
 {
-    stdio_init_all();
-
-    // There isn't a strict rule that you must always call sleep_ms()
-    // after stdio_init_all(). However, in some cases, it can be a helpful
-    // precautionary measure to ensure that the UART has properly 
-    // initialized and is ready to transmit data without any issues.
-    sleep_ms(2000);
-
-    printf("Init!");
-
     // Init all inputs and outputs
     gpio_init(INPUT_PIN1);
     gpio_init(INPUT_PIN2);
