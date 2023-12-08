@@ -8,20 +8,20 @@
 #include <ctype.h>
 
 
-#define DMXOUT1_PIN 6
-#define DMXIN1_PIN 7
-#define DMXENA1_PIN 3
+const uint DMXOUT1_PIN = 6;
+const uint DMXIN1_PIN = 7;
+const uint DMXENA1_PIN = 3;
 
-#define DMXOUT2_PIN 4
-#define DMXIN2_PIN 5
-#define DMXENA2_PIN 2
+const uint DMXOUT2_PIN = 0;
+const uint DMXIN2_PIN = 2;
+const uint DMXENA2_PIN = 1;
 
 const uint OUTPUT_PIN1 = 15;
 const uint OUTPUT_PIN2 = 16;
 const uint OUTPUT_PIN3 = 17;
 const uint OUTPUT_PIN4 = 18;
-const uint LED_PIN_DMXPORTA = 23;
-const uint LED_PIN_DMXPORTB = 24;
+const uint LED_PIN_DMXPORTA = 24;
+const uint LED_PIN_DMXPORTB = 23;
 const uint LED_PIN_INDICATOR = 25;
 const uint INPUT_PIN1 = 8;
 const uint INPUT_PIN2 = 9;
