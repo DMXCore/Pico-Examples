@@ -17,3 +17,5 @@ Example firmware for the DMX Core Pico and Pico 2.
 * Enjoy
 
 Note that you can also flash the Pico/Pico2 using a Raspberry Pi DebugProbe connected to the SWD debug port, however it's harder to reach with the enclosure on.
+
+Documentation: https://docs.dmxcore.com/dmx-core-pico-2/
