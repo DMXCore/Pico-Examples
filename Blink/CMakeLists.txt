@@ -16,6 +16,8 @@ endif()
 # Initialize the SDK
 pico_sdk_init()
 
+add_definitions(-DPICO_XOSC_STARTUP_DELAY_MULTIPLIER=64)
+
 # Pull in the DMX library
 include(../lib/Pico-DMX/interfaceLibForPicoSDK.cmake)
 
