@@ -45,8 +45,8 @@ uint8_t dmxDataA2[UNIVERSE_LENGTH + 1];
 uint8_t dmxDataB2[UNIVERSE_LENGTH + 1];
 bool outputPrimaryBuffer2;
 
-uint8_t dmxInputBuffer1[DMXINPUT_BUFFER_SIZE(1, 512)];
-uint8_t dmxInputBuffer2[DMXINPUT_BUFFER_SIZE(1, 512)];
+uint8_t dmxInputBuffer1[DMXINPUT_BUFFER_SIZE(512)];
+uint8_t dmxInputBuffer2[DMXINPUT_BUFFER_SIZE(512)];
 
 uint16_t mapping[512];
 
@@ -265,12 +265,12 @@ int main() {
     gpio_set_dir(DMXENA2_PIN, GPIO_OUT);
 
     // Start DMX outputs
-    dmxOutput1.begin(DMXOUT1_PIN);
-    dmxOutput2.begin(DMXOUT2_PIN);
+    dmxOutput1.begin(DMXOUT1_PIN, pio1);
+    dmxOutput2.begin(DMXOUT2_PIN, pio1);
 
     // Start DMX inputs
-    dmxInput1.begin(DMXIN1_PIN, 1, 512);
-    dmxInput2.begin(DMXIN2_PIN, 1, 512);
+    dmxInput1.begin(DMXIN1_PIN, 512);
+    dmxInput2.begin(DMXIN2_PIN, 512);
 
     // Clear buffers
     memset(dmxDataA1, 0, sizeof(dmxDataA1));
