@@ -3,6 +3,7 @@ Example firmware for the DMX Core Pico and Pico 2.
 
 ### Examples ###
 
+* Blink - Blinks the various LEDs and outputs
 * DmxRepeater - Reads DMX frames from port A, outputs to port B
 * DmxTriggerOutput - Reads DMX frames from port A, channel 1-4 drives digital output 1-4
 * InputTriggerDmx - Outputs DMX frames on port A. Digital input 1 sets all DMX channels to either 255 or 0
