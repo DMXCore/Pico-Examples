@@ -1,21 +1,38 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "pico/async_context_threadsafe_background.h"
 
 
 const uint LED_PIN_INDICATOR = 25;
 
-volatile char receivedChar;
+static bool work_done;
+
+static void async_worker_func(async_context_t *async_context, async_when_pending_worker_t *worker);
+
+// An async context is notified by the irq to "do some work"
+static async_context_threadsafe_background_t async_context;
+static async_when_pending_worker_t worker = { .do_work = async_worker_func };
+
+
+static void async_worker_func(async_context_t *async_context, async_when_pending_worker_t *worker)
+{
+    while(1)
+    {
+        int key = getchar_timeout_us(0);
+        
+        if (key == PICO_ERROR_TIMEOUT)
+            break;
+
+        printf("Key: %d\n", key);
+
+        gpio_put(LED_PIN_INDICATOR, !gpio_get(LED_PIN_INDICATOR));
+    }
+}
 
 void received_char_callback(void* param)
 {
-    gpio_put(LED_PIN_INDICATOR, !gpio_get(LED_PIN_INDICATOR));
-
-    int key = getchar_timeout_us(0); // get any pending key press but don't wait
-    if (key > 0)
-    {
-        // We never get here
-        receivedChar = (char)key;
-    }
+    // Tell the async worker that there are some characters waiting for us
+    async_context_set_work_pending(&async_context.core, &worker);
 }
 
 int main()
@@ -38,15 +55,23 @@ int main()
     // Set initial state
     gpio_put(LED_PIN_INDICATOR, 0);
 
+    // Setup an async context and worker to perform work when needed
+    if (!async_context_threadsafe_background_init_with_defaults(&async_context)) {
+        panic("failed to setup context");
+    }
+    async_context_add_when_pending_worker(&async_context.core, &worker);
+
     stdio_set_chars_available_callback(received_char_callback, NULL);
 
     // Send to console
     printf("Start!\n");
 
     while (1) {
-        if (receivedChar != 0)
-            printf("Last char: %c\n", receivedChar);
-
-        sleep_ms(500);
+        // Note that we could just sleep here as we're using "threadsafe_background" that uses a low priority interrupt
+        // But if we changed to use a "polling" context that wouldn't work. The following works for both types of context.
+        // When using "threadsafe_background" the poll does nothing. This loop is just preventing main from exiting!
+        work_done = false;
+        async_context_poll(&async_context.core);
+        async_context_wait_for_work_ms(&async_context.core, 500);
     }
 }

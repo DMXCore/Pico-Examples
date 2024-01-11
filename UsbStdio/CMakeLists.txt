@@ -32,7 +32,7 @@ target_sources(UsbStdio PUBLIC
 )
 
 # pull in common dependencies
-target_link_libraries(UsbStdio pico_stdlib)
+target_link_libraries(UsbStdio pico_stdlib pico_async_context_threadsafe_background)
 
 pico_enable_stdio_usb(UsbStdio 1)
 pico_enable_stdio_uart(UsbStdio 0)
