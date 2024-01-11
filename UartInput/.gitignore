@@ -1,0 +1,6 @@
+.idea/
+cmake-*
+build/
+generated/
+.DS_Store/
+.vscode
