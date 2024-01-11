@@ -35,6 +35,7 @@ target_sources(UsbStdio PUBLIC
 target_link_libraries(UsbStdio pico_stdlib)
 
 pico_enable_stdio_usb(UsbStdio 1)
+pico_enable_stdio_uart(UsbStdio 0)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(UsbStdio)
