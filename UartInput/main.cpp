@@ -16,16 +16,24 @@
 #include "uart_rx.pio.h"
 #include "uart_tx.pio.h"
 
-//#define PICO2_HARDWARE_REV10
+#define PICO2_HARDWARE_REV 10
+//#define PICO2_HARDWARE_REV 11
+//#define PICO2_HARDWARE_REV 12
 
 #define SERIAL_BAUD 9600
 
-#if defined(PICO2_HARDWARE_REV10)
+#if PICO2_HARDWARE_REV == 10
+// Hardware revision 1.0 used pins 6 and 7 for the expansion port
 #define PIO_RX_PIN 7
 #define PIO_TX_PIN 6
-#else
+#elif PICO2_HARDWARE_REV == 11
+// Hardware revision 1.1 used pins 21 and 22 for the expansion port
 #define PIO_RX_PIN 22
 #define PIO_TX_PIN 21
+#else
+// Hardware revision 1.2 and later used pins 4 and 5 for the expansion port
+#define PIO_RX_PIN 5
+#define PIO_TX_PIN 4
 #endif
 #define FIFO_SIZE 64
 
