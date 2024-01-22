@@ -16,13 +16,18 @@
 #include "uart_rx.pio.h"
 #include "uart_tx.pio.h"
 
-#define SERIAL_BAUD 9600
-#define HARD_UART_INST uart1
+//#define PICO2_HARDWARE_REV10
 
+#define SERIAL_BAUD 9600
+
+#if defined(PICO2_HARDWARE_REV10)
 #define PIO_RX_PIN 7
 #define PIO_TX_PIN 6
+#else
+#define PIO_RX_PIN 22
+#define PIO_TX_PIN 21
+#endif
 #define FIFO_SIZE 64
-#define MAX_COUNTER 10
 
 #define MAX_STRING_LENGTH 50
 
