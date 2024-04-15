@@ -16,9 +16,9 @@
 #include "uart_rx.pio.h"
 #include "uart_tx.pio.h"
 
-#define PICO2_HARDWARE_REV 10
+//#define PICO2_HARDWARE_REV 10
 //#define PICO2_HARDWARE_REV 11
-//#define PICO2_HARDWARE_REV 12
+#define PICO2_HARDWARE_REV 12
 
 #define SERIAL_BAUD 9600
 
