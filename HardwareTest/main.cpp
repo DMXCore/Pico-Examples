@@ -38,12 +38,8 @@ DmxInput dmxInput2;
 #define OUTPUT_TIMEOUT_MS 3000
 
 
-uint8_t dmxDataA1[UNIVERSE_LENGTH + 1];
-uint8_t dmxDataB1[UNIVERSE_LENGTH + 1];
-bool outputPrimaryBuffer1;
-uint8_t dmxDataA2[UNIVERSE_LENGTH + 1];
-uint8_t dmxDataB2[UNIVERSE_LENGTH + 1];
-bool outputPrimaryBuffer2;
+uint8_t dmxData1[UNIVERSE_LENGTH + 1];
+uint8_t dmxData2[UNIVERSE_LENGTH + 1];
 
 uint8_t dmxInputBuffer1[DMXINPUT_BUFFER_SIZE(512)];
 uint8_t dmxInputBuffer2[DMXINPUT_BUFFER_SIZE(512)];
@@ -75,58 +71,27 @@ bool inputActive2;
 
 bool repeating_timer_callback(struct repeating_timer *t)
 {
-    clock_t now = time_us_64();
-    int flashSpeed = 0;
+    // Populate buffer from inputs
+    uint8_t value1 = gpio_get(INPUT_PIN1) ? 0 : 255;
+    uint8_t value2 = gpio_get(INPUT_PIN2) ? 0 : 255;
+    uint8_t value3 = gpio_get(INPUT_PIN3) ? 0 : 255;
+    uint8_t value4 = gpio_get(INPUT_PIN4) ? 0 : 255;
 
-    if (outputActive2)
-    {
-        int ms_since_last = (now - lastOutputFrame2) / 1000;
-        if (ms_since_last > OUTPUT_TIMEOUT_MS)
-        {
-            // Turn off output 2
-            outputActive2 = false;
-            gpio_put(DMXENA2_PIN, outputActive2);
-        }
+    dmxData1[1] = value1;
+    dmxData1[2] = value2;
+    dmxData1[3] = value3;
+    dmxData1[4] = value4;
 
-        flashSpeed++;
-    }
+    // Send DMX
+    dmxOutput1.write(dmxData1, UNIVERSE_LENGTH + 1);
 
-    // Check inputs for timeout
-    int ms_since_last = (now - lastInputFrame1) / 1000;
-    if (inputActive1 && ms_since_last > INPUT_TIMEOUT_MS)
-    {
-        // Flash slowly
-        ledA_mod_value = 20;
-    }
+    // Flash fast
+    ledB_mod_value = 10;
 
-    ms_since_last = (now - lastInputFrame2) / 1000;
-    if (inputActive2 && ms_since_last > INPUT_TIMEOUT_MS)
-    {
-        // Flash slowly
-        ledB_mod_value = 20;
-    }
-
-    if (!inputActive1)
-        ledA_mod_value = outputActive1 ? 1 : 0;
-    if (!inputActive2)
-        ledB_mod_value = outputActive2 ? 1 : 0;
+    // Flash faster
+    led_mod_value = 5;
 
     timer_counter++;
-
-    switch (flashSpeed)
-    {
-        case 1:
-            led_mod_value = 10;
-            break;
-
-        case 2:
-            led_mod_value = 5;
-            break;
-
-        default:
-            led_mod_value = 40;
-            break;
-    }
 
     if (led_mod_value == 0)
     {
@@ -176,38 +141,22 @@ bool repeating_timer_callback(struct repeating_timer *t)
 void __isr dmxDataReceived(DmxInput* instance) {
      // A DMX frame has been received
 
-    if (instance == &dmxInput1 && inputActive1)
-    {
-        // Input 1
-        lastInputFrame1 = time_us_64();
-
-        if (dmxInputBuffer1[0] == 0)
-        {
-            // Start code 0
-            ledA_mod_value = 3;
-
-            uint8_t * outBuf = outputPrimaryBuffer2 == 0 ? dmxDataB2 : dmxDataA2;
-            memcpy(outBuf, dmxInputBuffer1, 513);
-
-            // Switch buffers
-            outputPrimaryBuffer2 = !outputPrimaryBuffer2;
-            lastOutputFrame2 = time_us_64();
-            // Turn on output if it was disabled
-            outputActive2 = true;
-
-            gpio_put(DMXENA2_PIN, outputActive2);
-
-            // Make sure we're not in the middle of sending
-            while (dmxOutput2.busy());
-            dmxOutput2.write(outputPrimaryBuffer2 == 0 ? dmxDataA2 : dmxDataB2, UNIVERSE_LENGTH + 1);
-        }
-    }
-
     if (instance == &dmxInput2 && inputActive2)
     {
         // Input 2
         lastInputFrame2 = time_us_64();
-        ledB_mod_value = 2;
+
+        if (dmxInputBuffer2[0] == 0)
+        {
+            // Start code 0
+            ledA_mod_value = 3;
+
+            // Have channel 1 control Output 1, 2=2, 3=3, 4=4
+            gpio_put(OUTPUT_PIN1, dmxInputBuffer2[1] != 0);
+            gpio_put(OUTPUT_PIN2, dmxInputBuffer2[2] != 0);
+            gpio_put(OUTPUT_PIN3, dmxInputBuffer2[3] != 0);
+            gpio_put(OUTPUT_PIN4, dmxInputBuffer2[4] != 0);
+        }
     }
 }
 
@@ -271,10 +220,8 @@ int main() {
     dmxInput2.begin(DMXIN2_PIN, 512);
 
     // Clear buffers
-    memset(dmxDataA1, 0, sizeof(dmxDataA1));
-    memset(dmxDataB1, 0, sizeof(dmxDataB1));
-    memset(dmxDataA2, 0, sizeof(dmxDataA2));
-    memset(dmxDataB2, 0, sizeof(dmxDataB2));
+    memset(dmxData1, 0, sizeof(dmxData1));
+    memset(dmxData2, 0, sizeof(dmxData2));
 
     // Start send timer
     struct repeating_timer timer;
@@ -285,10 +232,10 @@ int main() {
     dmxInput2.read_async(dmxInputBuffer2, dmxDataReceived);
 
     // Set initial configuration
-    inputActive1 = true;
-    outputActive1 = false;
-    inputActive2 = false;
-    outputActive2 = true;
+    inputActive1 = false;
+    outputActive1 = true;
+    inputActive2 = true;
+    outputActive2 = false;
 
     gpio_put(DMXENA1_PIN, outputActive1);
     gpio_put(DMXENA2_PIN, outputActive2);
